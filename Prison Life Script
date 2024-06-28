@@ -1,0 +1,179 @@
+-- Prison Life Hack Hub
+
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+
+local Window = OrionLib:MakeWindow({Name = "Prison Life Hack Hub", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+
+local DoorsTab = Window:MakeTab({
+	Name = "Doors",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+local Section = DoorsTab:AddSection({
+	Name = "Doors"
+})
+
+DoorsTab:AddButton({
+	Name = "Delete Doors",
+	Callback = function()
+      		game.Workspace.Doors:Destroy()
+  	end    
+})
+
+local TeleportTab = Window:MakeTab({
+	Name = "Teleporter",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+local Section = TeleportTab:AddSection({
+	Name = "Teleporters"
+})
+
+TeleportTab:AddButton({
+	Name = "Escape From The Prison",
+	Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-905.213562, 91.627182, 2133.9707, 0, 0, -1, 0, 1, 0, 1, 0, 0)
+  	end    
+})
+
+TeleportTab:AddButton({
+	Name = "Go Back The Prison",
+	Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(486.200043, 97.0399399, 2253.1001, 0, 0, 1, 0, 1, -0, -1, 0, 0)
+  	end    
+})
+
+TeleportTab:AddButton({
+	Name = "Gun Room",
+	Callback = function()
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(821.793823, 98.2000122, 2280.89917, -1.1920929e-07, -0, -1.00000012, 0, 1, -0, 1.00000012, 0, -1.1920929e-07)
+  	end    
+})
+
+local TPTab = Window:MakeTab({
+	Name = "TP",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+TPTab:AddTextbox({
+	Name = "Goto",
+	Default = "Player Name",
+	TextDisappear = true,
+	Callback = function(Value)
+		_G.PlayerName = Value  -- Value doğru bir şekilde alınıyor
+	end	  
+})
+
+TPTab:AddButton({
+	Name = "Teleport to Player",
+	Callback = function()
+		local targetPlayer = game.Players:FindFirstChild(_G.PlayerName)
+		if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+		else
+			print("Player not found or not in game")
+		end
+	end
+})
+
+-- FlyTab oluşturma
+local FlyTab = Window:MakeTab({
+	Name = "Fly",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+-- Fly toggle function
+local flying = false
+local flySpeed = 1
+local flyDirection = Vector3.new(0, 0, 0)
+
+local function toggleFly()
+    flying = not flying
+    local plr = game.Players.LocalPlayer
+    local char = plr.Character
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+
+    if flying then
+        local bg = Instance.new("BodyGyro", torso)
+        local bv = Instance.new("BodyVelocity", torso)
+        bg.P = 9e4
+        bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+        bg.cframe = torso.CFrame
+        bv.velocity = Vector3.new(0, 0.1, 0)
+        bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+
+        -- Klavye girişini dinlemek ve hareket yönünü ayarlamak
+        local userInputService = game:GetService("UserInputService")
+
+        function onInputBegan(input, gameProcessedEvent)
+            if input.UserInputType == Enum.UserInputType.Keyboard then
+                if input.KeyCode == Enum.KeyCode.W then
+                    flyDirection = workspace.CurrentCamera.CFrame.lookVector * flySpeed
+                elseif input.KeyCode == Enum.KeyCode.A then
+                    flyDirection = -workspace.CurrentCamera.CFrame.rightVector * flySpeed
+                elseif input.KeyCode == Enum.KeyCode.S then
+                    flyDirection = -workspace.CurrentCamera.CFrame.lookVector * flySpeed
+                elseif input.KeyCode == Enum.KeyCode.D then
+                    flyDirection = workspace.CurrentCamera.CFrame.rightVector * flySpeed
+                end
+            end
+        end
+
+        function onInputEnded(input)
+            if input.UserInputType == Enum.UserInputType.Keyboard then
+                if input.KeyCode == Enum.KeyCode.W or input.KeyCode == Enum.KeyCode.A or
+                   input.KeyCode == Enum.KeyCode.S or input.KeyCode == Enum.KeyCode.D then
+                    flyDirection = Vector3.new(0, 0, 0)
+                end
+            end
+        end
+
+        userInputService.InputBegan:Connect(onInputBegan)
+        userInputService.InputEnded:Connect(onInputEnded)
+
+        repeat
+            wait()
+            hum.PlatformStand = true
+            bv.velocity = flyDirection + Vector3.new(0, 0.1, 0)
+            bg.cframe = workspace.CurrentCamera.CFrame
+        until not flying
+
+        hum.PlatformStand = false
+        bg:Destroy()
+        bv:Destroy()
+
+        userInputService.InputBegan:Disconnect(onInputBegan)
+        userInputService.InputEnded:Disconnect(onInputEnded)
+    end
+end
+
+-- Fly speed slider
+FlyTab:AddSlider({
+    Name = "Fly Speed",
+    Min = 1,
+    Max = 100,
+    Default = flySpeed,
+    Increment = 1,
+    Suffix = "Speed",
+    Callback = function(Value)
+        flySpeed = Value
+    end,
+})
+
+-- Fly toggle
+FlyTab:AddToggle({
+    Name = "Fly",
+    Default = false,
+    Callback = function(Value)
+        if Value then
+            toggleFly()
+        else
+            flying = false
+        end
+    end,
+})

@@ -177,3 +177,14 @@ FlyTab:AddToggle({
         end
     end,
 })
+local CreditsTab = Window:MakeTab({
+	Name = "Credits",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+local Section = TeleportTab:AddSection({
+	Name = "Credits"
+})
+
+CreditsTab:AddLabel("Credits : MrShadow")

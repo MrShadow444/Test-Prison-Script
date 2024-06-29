@@ -183,7 +183,7 @@ local CreditsTab = Window:MakeTab({
 	PremiumOnly = false
 })
 
-local Section = TeleportTab:AddSection({
+local Section = CreditsTab:AddSection({
 	Name = "Credits"
 })
 
